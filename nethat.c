@@ -11,6 +11,7 @@
 int verbose = 0;
 int slots = 32;
 char *port = NULL;
+int family = AF_UNSPEC;
 
 int server = 0;
 int *clients;
@@ -18,13 +19,15 @@ int *clients;
 static struct option options[] = {
     {"verbose", no_argument, 0, 'v'},
     {"port", required_argument, 0, 'p'},
+    {"ipv4", required_argument, 0, '4'},
+    {"ipv6", required_argument, 0, '6'},
     {"slots", required_argument, 0, 'n'},
     {0, 0, 0, 0}
 };
 
 int parse_args(int argc, char **argv){
     char c;
-    while((c = getopt_long(argc, argv, "vp:n:", options, NULL)) != -1){
+    while((c = getopt_long(argc, argv, "vp:n:46", options, NULL)) != -1){
         switch(c){
             case 'v':
                 verbose = 1;
@@ -38,6 +41,12 @@ int parse_args(int argc, char **argv){
                     fprintf(stderr, "invalid number of slots: %s\n", optarg);
                     return 0;
                 }
+                break;
+            case '4':
+                family = AF_INET;
+                break;
+            case '6':
+                family = AF_INET6;
                 break;
             default:
                 return 0;
@@ -58,7 +67,7 @@ int server_init(){
     struct addrinfo *addrs, *addr;
     struct addrinfo hints;
     memset(&hints, 0, sizeof(struct addrinfo));
-    hints.ai_family = AF_UNSPEC;
+    hints.ai_family = family;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
     int rc = getaddrinfo(NULL, port, &hints, &addrs);
