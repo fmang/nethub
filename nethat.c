@@ -11,6 +11,7 @@
 int verbose = 0;
 int slots = 32;
 char *port = NULL;
+char *bind_address = NULL;
 int family = AF_UNSPEC;
 
 int server = 0;
@@ -19,6 +20,7 @@ int *clients = NULL;
 static struct option options[] = {
     {"verbose", no_argument, 0, 'v'},
     {"port", required_argument, 0, 'p'},
+    {"bind", required_argument, 0, 'l'},
     {"ipv4", required_argument, 0, '4'},
     {"ipv6", required_argument, 0, '6'},
     {"slots", required_argument, 0, 'n'},
@@ -27,13 +29,16 @@ static struct option options[] = {
 
 int parse_args(int argc, char **argv){
     char c;
-    while((c = getopt_long(argc, argv, "vp:n:46", options, NULL)) != -1){
+    while((c = getopt_long(argc, argv, "vp:l:n:46", options, NULL)) != -1){
         switch(c){
             case 'v':
                 verbose = 1;
                 break;
             case 'p':
                 port = optarg;
+                break;
+            case 'l':
+                bind_address = optarg;
                 break;
             case 'n':
                 slots = atoi(optarg);
@@ -70,7 +75,7 @@ int server_init(){
     hints.ai_family = family;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
-    int rc = getaddrinfo(NULL, port, &hints, &addrs);
+    int rc = getaddrinfo(bind_address, port, &hints, &addrs);
     if(rc != 0){
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rc));
         return 0;
@@ -93,7 +98,7 @@ int server_init(){
         return 0;
     }
     if(verbose)
-        fprintf(stderr, "listening on %s\n", port);
+        fprintf(stderr, "listening on %s, port %s\n", (bind_address == NULL ? "*" : bind_address), port);
     return 1;
 }
 
