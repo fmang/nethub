@@ -14,7 +14,7 @@ char *port = NULL;
 int family = AF_UNSPEC;
 
 int server = 0;
-int *clients;
+int *clients = NULL;
 
 static struct option options[] = {
     {"verbose", no_argument, 0, 'v'},
@@ -133,10 +133,9 @@ void shut(int *fd){
 void clean_up(){
     close(server);
     int i;
-    for(i=0; i<slots; i++){
+    for(i=0; i<slots; i++)
         shut(clients+i);
-        free(clients);
-    }
+    free(clients);
     exit(EXIT_SUCCESS);
 }
 
@@ -174,13 +173,13 @@ int main(int argc, char **argv){
     for(i=0; i<slots; i++)
         clients[i] = -1;
 
-    /*struct sigaction action;
+    struct sigaction action;
     action.sa_handler = clean_up;
     sigemptyset(&action.sa_mask);
     action.sa_flags = 0;
     sigaction(SIGINT, &action, NULL);
     sigaction(SIGHUP, &action, NULL);
-    sigaction(SIGTERM, &action, NULL);*/
+    sigaction(SIGTERM, &action, NULL);
 
     int nfds, rc;
     fd_set rd;
