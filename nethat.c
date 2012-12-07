@@ -121,7 +121,7 @@ int server_accept(){
 }
 
 void shut(int *fd){
-    if(fd < 0)
+    if(*fd < 0)
         return;
     shutdown(*fd, SHUT_RDWR);
     close(*fd);
