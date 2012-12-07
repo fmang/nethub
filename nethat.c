@@ -7,9 +7,11 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <sys/un.h>
 
 int verbose = 0;
 int slots = 32;
+char *socket_path = NULL;
 char *port = NULL;
 char *bind_address = NULL;
 int family = AF_UNSPEC;
@@ -19,6 +21,7 @@ int *clients = NULL;
 
 static struct option options[] = {
     {"verbose", no_argument, 0, 'v'},
+    {"socket", required_argument, 0, 'u'},
     {"port", required_argument, 0, 'p'},
     {"bind", required_argument, 0, 'l'},
     {"ipv4", required_argument, 0, '4'},
@@ -29,10 +32,13 @@ static struct option options[] = {
 
 int parse_args(int argc, char **argv){
     char c;
-    while((c = getopt_long(argc, argv, "vp:l:n:46", options, NULL)) != -1){
+    while((c = getopt_long(argc, argv, "vu:p:l:n:46", options, NULL)) != -1){
         switch(c){
             case 'v':
                 verbose = 1;
+                break;
+            case 'u':
+                socket_path = optarg;
                 break;
             case 'p':
                 port = optarg;
@@ -61,14 +67,33 @@ int parse_args(int argc, char **argv){
         fputs("invalid arguments\n", stderr);
         return 0;
     }
-    if(port == NULL){
-        fputs("no port specified\n", stderr);
+    if(socket_path == NULL && port == NULL){
+        fputs("no socket or port specified\n", stderr);
         return 0;
     }
     return 1;
 }
 
-int server_init(){
+int server_init_unix(){
+    server = socket(AF_UNIX, SOCK_STREAM, 0);
+    if(server == -1){
+        perror("socket");
+        return 0;
+    }
+    struct sockaddr_un addr;
+    addr.sun_family = AF_UNIX;
+    strcpy(addr.sun_path, socket_path);
+    int len = strlen(addr.sun_path) + sizeof(addr.sun_family);
+    if(bind(server, (struct sockaddr*) &addr, len) == -1){
+        perror("bind");
+        return 0;
+    }
+    if(verbose)
+        fprintf(stderr, "listening on %s\n", socket_path);
+    return 1;
+}
+
+int server_init_tcp(){
     struct addrinfo *addrs, *addr;
     struct addrinfo hints;
     memset(&hints, 0, sizeof(struct addrinfo));
@@ -89,12 +114,8 @@ int server_init(){
         close(server);
     }
     freeaddrinfo(addrs);
-    if(addr == NULL)
-        return 0;
-    rc = listen(server, slots);
-    if(rc == -1){
-        perror("listen");
-        close(server);
+    if(addr == NULL){
+        fputs("no address to bind\n", stderr);
         return 0;
     }
     if(verbose)
@@ -141,6 +162,8 @@ void clean_up(){
     for(i=0; i<slots; i++)
         shut(clients+i);
     free(clients);
+    if(socket_path != NULL)
+        unlink(socket_path);
     exit(EXIT_SUCCESS);
 }
 
@@ -169,8 +192,15 @@ int main(int argc, char **argv){
     if(!parse_args(argc, argv))
         return EXIT_FAILURE;
 
-    if(!server_init()){
-        fputs("no address to bind\n", stderr);
+    if(socket_path != NULL){
+        if(!server_init_unix())
+            return EXIT_FAILURE;
+    }
+    else if(!server_init_tcp())
+        return EXIT_FAILURE;
+    if(listen(server, slots) == -1){
+        perror("listen");
+        close(server);
         return EXIT_FAILURE;
     }
     clients = (int*) malloc(slots * sizeof(int));
