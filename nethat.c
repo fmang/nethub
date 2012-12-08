@@ -24,8 +24,8 @@ static struct option options[] = {
     {"socket", required_argument, 0, 'u'},
     {"port", required_argument, 0, 'p'},
     {"bind", required_argument, 0, 'l'},
-    {"ipv4", required_argument, 0, '4'},
-    {"ipv6", required_argument, 0, '6'},
+    {"ipv4", no_argument, 0, '4'},
+    {"ipv6", no_argument, 0, '6'},
     {"slots", required_argument, 0, 'n'},
     {0, 0, 0, 0}
 };
