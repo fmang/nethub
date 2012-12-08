@@ -1,3 +1,3 @@
 CFLAGS=-Wall
 
-nethat: nethat.c
+nethub: nethub.c
