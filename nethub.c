@@ -21,7 +21,7 @@ const char *help =
     "  -h, --help           print this help\n"
     "  -v, --verbose        no need to explain\n"
     "  -n, --slots NUM      specify the maximum number of clients\n"
-    "  -u, --socket PATH    create a UNIX socket\n"
+    "  -u, --socket PATH    create a Unix domain socket\n"
     "  -p, --port PORT      open a TCP server\n"
     "  -4, --ipv4           force IPv4\n"
     "  -6, --ipv6           force IPv6\n"
@@ -224,7 +224,8 @@ int main(int argc, char **argv){
     if(print_help){
         puts(version);
         puts(usage);
-        fputs(help, stdout);
+        puts(help);
+        puts("See the man page for extensive documentation.");
         return EXIT_SUCCESS;
     }
 

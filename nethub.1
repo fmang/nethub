@@ -1,0 +1,69 @@
+.TH nethub 1 "December 2012"
+.SH NAME
+nethub \- network repeater
+.SH SYNOPSIS
+.B nethub --help
+.br
+.B nethub
+.RB [ -v ]
+.B -u
+.I socket
+.br
+.B nethub
+.RB [ -v ]
+.RB [ -46 ]
+.RB [ -l
+.IR address ]
+.B -p
+.I port
+.SH DESCRPTION
+.PP
+\fBnethub\fP opens a Unix-domain or TCP server and listens for incoming
+connections.  When some data is received from one of the clients, it is
+forwarded to all the other clients; pretty much like a multi-user chat.
+.PP
+Used in conjuction with a software like \fBsocat\fP, it allows connection
+sharing (e.g. run several IRC bots on the same connection). Add OpenBSD's
+\fBnc\fP and you'll be able to inject data into the shared connection. Note that
+in that case both side will catch it.
+.PP
+Using \fBsocat\fP's unidirectional mode (\fI-u\fP), you could also broadcast data
+to multiple clients (e.g. audio streams, or notifications).
+.SH OPTIONS
+.TP
+.B \-h, \-\-help
+Display a brief description of the options.
+.TP
+.B \-b, \-\-verbose
+Verbose mode. Print a message when the server is ready, when there is an
+incoming connection or when a connection is closed.
+.TP
+.B \-n, \-\-slots \fInum\fP
+Specify how many connections can be accepter. If all the slots are filled, any
+incoming connection will be rejected and a warning will be printed.
+.TP
+.B \-u, \-\-socket \fIpath\fP
+Open the server on a Unix domain socket. If a file already exists at the
+specified location, \fBnethub\fP will fail with \fIAddress already in use\fP.
+Under normal circumstances, the socket is deleted when \fBnethub\fP exits.
+When this option is specified, the options below are ignored.
+.TP
+.B \-p, \-\-port port
+Open a TCP server on the specified port. This option can be used in combination
+with the options below.
+.TP
+.B \-4, \-\-ipv4
+Force IPv4.
+.TP
+.B \-6, \-\-ipv6
+Force IPv6.
+.TP
+.B \-l, \-\-bind address
+Specify the address to listen on.
+By default, all available addresses are bound.
+.SH SEE ALSO
+.BR nc (1),
+.BR netcat (1),
+.BR socat (1).
+.SH AUTHOR
+Frédéric Mangano <fmang@mg0.fr>
