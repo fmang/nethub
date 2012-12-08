@@ -51,7 +51,7 @@ static struct option options[] = {
 };
 
 int parse_args(int argc, char **argv){
-    char c;
+    int c;
     while((c = getopt_long(argc, argv, "hvu:p:l:n:46", options, NULL)) != -1){
         switch(c){
             case 'h':
