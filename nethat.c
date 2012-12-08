@@ -9,6 +9,25 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
+const char *version = "nethub version 1.0\n";
+
+const char *usage =
+    "Usage: nethub --help\n"
+    "       nethub [-v] -u SOCKET\n"
+    "       nethub [-v] [-46] [-l ADDRESS] -p PORT\n";
+
+const char *help =
+    "Options:\n"
+    "  -h, --help           print this help\n"
+    "  -v, --verbose        no need to explain\n"
+    "  -n, --slots NUM      specify the maximum number of clients\n"
+    "  -u, --socket PATH    create a UNIX socket\n"
+    "  -p, --port PORT      open a TCP server\n"
+    "  -4, --ipv4           force IPv4\n"
+    "  -6, --ipv6           force IPv6\n"
+    "  -l, --bind ADDRESS   specify the address to bind (TCP)\n";
+
+int print_help = 0;
 int verbose = 0;
 int slots = 32;
 char *socket_path = NULL;
@@ -20,6 +39,7 @@ int server = 0;
 int *clients = NULL;
 
 static struct option options[] = {
+    {"help", no_argument, 0, 'h'},
     {"verbose", no_argument, 0, 'v'},
     {"socket", required_argument, 0, 'u'},
     {"port", required_argument, 0, 'p'},
@@ -32,8 +52,11 @@ static struct option options[] = {
 
 int parse_args(int argc, char **argv){
     char c;
-    while((c = getopt_long(argc, argv, "vu:p:l:n:46", options, NULL)) != -1){
+    while((c = getopt_long(argc, argv, "hvu:p:l:n:46", options, NULL)) != -1){
         switch(c){
+            case 'h':
+                print_help = 1;
+                return 1;
             case 'v':
                 verbose = 1;
                 break;
@@ -64,7 +87,7 @@ int parse_args(int argc, char **argv){
         }
     }
     if(optind != argc){
-        fputs("invalid arguments\n", stderr);
+        fputs("invalid arguments; see --help\n", stderr);
         return 0;
     }
     if(socket_path == NULL && port == NULL){
@@ -189,8 +212,21 @@ int forward(int src){
 
 int main(int argc, char **argv){
 
+    if(argc == 1){
+        fputs(version, stdout);
+        fputs(usage, stdout);
+        return EXIT_SUCCESS;
+    }
+
     if(!parse_args(argc, argv))
         return EXIT_FAILURE;
+
+    if(print_help){
+        puts(version);
+        puts(usage);
+        fputs(help, stdout);
+        return EXIT_SUCCESS;
+    }
 
     if(socket_path != NULL){
         if(!server_init_unix())
