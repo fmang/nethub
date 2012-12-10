@@ -18,12 +18,12 @@ nethub \- network repeater
 .I port
 .SH DESCRPTION
 .PP
-\fBnethub\fP opens a Unix-domain or TCP server and listens for incoming
+\fBnethub\fP opens a Unix domain or TCP server and listens for incoming
 connections.  When some data is received from one of the clients, it is
 forwarded to all the other clients; pretty much like a multi-user chat.
 .PP
 Used in conjuction with a software like \fBsocat\fP, it allows connection
-sharing (e.g. run several IRC bots on the same connection). Add OpenBSD's
+sharing (e.g. run several IRC bots on the same connection). Add OpenBSD
 \fBnc\fP and you'll be able to inject data into the shared connection. Note that
 in that case both side will catch it.
 .PP
@@ -39,7 +39,7 @@ Verbose mode. Print a message when the server is ready, when there is an
 incoming connection or when a connection is closed.
 .TP
 .B \-n, \-\-slots \fInum\fP
-Specify how many connections can be accepter. If all the slots are filled, any
+Specify how many connections can be accepted. If all the slots are filled, any
 incoming connection will be rejected and a warning will be printed.
 .TP
 .B \-u, \-\-socket \fIpath\fP
@@ -48,7 +48,7 @@ specified location, \fBnethub\fP will fail with \fIAddress already in use\fP.
 Under normal circumstances, the socket is deleted when \fBnethub\fP exits.
 When this option is specified, the options below are ignored.
 .TP
-.B \-p, \-\-port port
+.B \-p, \-\-port \fIport\fP
 Open a TCP server on the specified port. This option can be used in combination
 with the options below.
 .TP
