@@ -275,6 +275,8 @@ int main(int argc, char **argv){
         if(FD_ISSET(server, &rd))
             server_accept();
         for(i=0; i<slots; i++){
+            if(clients[i] < 0)
+                continue;
             if(FD_ISSET(clients[i], &rd)){
                 if(!forward(clients[i]))
                     shut(clients+i);
