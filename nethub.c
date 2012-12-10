@@ -9,7 +9,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
-const char *version = "nethub version 1.0\n";
+const char *version = "nethub version 1.1\n";
 
 const char *usage =
     "Usage: nethub --help\n"
